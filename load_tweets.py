@@ -90,7 +90,7 @@ def insert_tweet(connection,tweet):
     '''
 
     with connection.begin() as trans:
-    
+
     # skip tweet if it's already inserted
         sql=sqlalchemy.sql.text('''
         SELECT id_tweets 
@@ -187,7 +187,7 @@ def insert_tweet(connection,tweet):
                     (:id_users)
                 on conflict do nothing;
                 ''')
-            res = connection.execute(sql,{'id_users':tweet.get('in_reply_to_user_id', None)})   
+            res = connection.execute(sql,{'id_users':tweet.get('in_reply_to_user_id', None)})        
 
         # insert the tweet
         sql=sqlalchemy.sql.text(f'''
@@ -196,8 +196,7 @@ def insert_tweet(connection,tweet):
                     values
                     (:id_tweets, :id_users, :created_at, :in_reply_to_status_id, :in_reply_to_user_id, :quoted_status_id, :retweet_count, :favorite_count, :quote_count, :source, :text, :country_code, :state_code, :lang, :place_name, :geo)''')    
         
-        res = connection.execute(sql, {'id_tweets':tweet['id'], 'id_users':tweet.get('in_reply_to_user_id', None), 'created_at':tweet['created_at'], 'in_reply_to_status_id':tweet['in_reply_to_status_id'], 'in_reply_to_user_id':tweet['in_reply_to_user_id'], 'quoted_status_id':tweet.get('quoted_status_id', None), 'retweet_count':tweet['retweet_count'], 'favorite_count':tweet['favorite_count'], 'quote_count':tweet['quote_count'], 'source':remove_nulls(tweet['source']), 'text':remove_nulls(text), 'country_code':country_code,'state_code':state_code, 'lang':remove_nulls(tweet['lang']),'place_name':remove_nulls(place_name), 'geo':geo_str + '(' + geo_coords + ')'})
-
+        res = connection.execute(sql, {'id_tweets':tweet['id'], 'id_users':tweet.get('in_reply_to_user_id', None), 'created_at':tweet['created_at'], 'in_reply_to_status_id':tweet['in_reply_to_status_id'], 'in_reply_to_user_id':tweet['in_reply_to_user_id'], 'quoted_status_id':tweet.get('quoted_status_id', None), 'retweet_count':tweet['retweet_count'], 'favorite_count':tweet['favorite_count'], 'quote_count':tweet['quote_count'], 'source':remove_nulls(tweet['source']), 'text':remove_nulls(text), 'country_code':country_code,'state_code':state_code, 'lang':remove_nulls(tweet['lang']),'place_name':remove_nulls(place_name), 'geo':geo_str + '(' + geo_coords + ')'}) 
         ########################################
         # insert into the tweet_urls table
         ########################################
@@ -207,7 +206,7 @@ def insert_tweet(connection,tweet):
         except KeyError:
             urls = tweet['entities']['urls']
 
-         for url in urls:
+        for url in urls:
             id_urls = get_id_urls(url['expanded_url'], connection)
 
             sql=sqlalchemy.sql.text('''
@@ -234,7 +233,7 @@ def insert_tweet(connection,tweet):
             # therefore, we must store the user info "unhydrated"
             # HINT:
             # use the ON CONFLICT DO NOTHING syntax
-               sql=sqlalchemy.sql.text('''
+            sql=sqlalchemy.sql.text('''
                 insert into users
                     (id_users)
                     values
@@ -338,7 +337,6 @@ if __name__ == '__main__':
             for subfilename in sorted(archive.namelist(), reverse=True):
                 with io.TextIOWrapper(archive.open(subfilename)) as f:
                     for i,line in enumerate(f):
-
                         # load and insert the tweet
                         tweet = json.loads(line)
                         insert_tweet(connection,tweet)
